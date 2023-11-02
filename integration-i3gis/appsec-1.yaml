@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: I3GIS_INTEGRATION
+spec:
+  steps:
+    - name: I3GIS_SCAN
+      image: alpine
+      script: |
+        #!/bin/sh
+        final String urlScan = """--location -g --request POST 'https://api.i3gis.id/scan-svc/scan' --header 'Content-Type: application/json' --header 'Authorization: Bearer 6Kb03xxdXX88x6MQRj3QwZv9yQsOg/RM0xfJABSZsU+qfRLjQyJDTQTBrvWbke0lv9xwfxD1Mc3q9tGIkh8fOfTilhxB5TLowFmR3MEoxiO1hN0cCdMA5hZwHIoaRVnKoIWVrqgsOOJym5bEFnBPww==' -d '{"project_id":5}'"""
+        final def (String responseScan, String codeScan) = sh(script: "set +x; curl -s -w '\n%{response_code}' $urlScan", returnStdout: true).trim().tokenize("\n")
+
+        echo "HTTP response status code: $codeScan"
+
+        if (codeScan != "200") {
+            echo "Response: " + responseScan
+            error("Build failed because scan not success...")
+        } else {
+            echo "Scan project 123 with i3gis..."
+        }
+
+         echo "Scan project 123 with i3gis is starting..."
