@@ -8,16 +8,24 @@ spec:
       image: alpine
       script: |
         #!/bin/sh
-        final String urlScan = """--location -g --request POST 'https://api.i3gis.id/scan-svc/scan' --header 'Content-Type: application/json' --header 'Authorization: Bearer 6Kb03xxdXX88x6MQRj3QwZv9yQsOg/RM0xfJABSZsU+qfRLjQyJDTQTBrvWbke0lv9xwfxD1Mc3q9tGIkh8fOfTilhxB5TLowFmR3MEoxiO1hN0cCdMA5hZwHIoaRVnKoIWVrqgsOOJym5bEFnBPww==' -d '{"project_id":5}'"""
-        final def (String responseScan, String codeScan) = sh(script: "set +x; curl -s -w '\n%{response_code}' $urlScan", returnStdout: true).trim().tokenize("\n")
+        urlScan="https://api.i3gis.id/scan-svc/scan"
+        token="Bearer 6Kb03xxdXX88x6MQRj3QwZv9yQsOg/RM0xfJABSZsU+qfRLjQyJDTQTBrvWbke0lv9xwfxD1Mc3q9tGIkh8fOfTilhxB5TLowFmR3MEoxiO1hN0cCdMA5hZwHIoaRVnKoIWVrqgsOOJym5bEFnBPww=="
+        project_id=5
+
+        responseScan=$(curl -s -w '\n%{response_code}' --location -g --request POST $urlScan \
+                        --header 'Content-Type: application/json' \
+                        --header "Authorization: $token" \
+                        -d "{\"project_id\":$project_id}")
+
+        codeScan=$(echo "$responseScan" | tail -n1)
 
         echo "HTTP response status code: $codeScan"
 
-        if (codeScan != "200") {
-            echo "Response: " + responseScan
-            error("Build failed because scan not success...")
-        } else {
-            echo "Scan project 123 with i3gis..."
-        }
+        if [ "$codeScan" != "200" ]; then
+            echo "Response: $responseScan"
+            exit 1
+        else
+            echo "Scan project $project_id with i3gis..."
+        fi
 
-         echo "Scan project 123 with i3gis is starting..."
+        echo "Scan project $project_id with i3gis is starting..."
