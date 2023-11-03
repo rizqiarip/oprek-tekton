@@ -4,7 +4,7 @@ metadata:
   name: i3gis-appsec
 spec:
   steps:
-    - name: i3gis-scan
+    - name: appsec-scan
       image: debian
       script: |
         #!/bin/sh
@@ -22,7 +22,7 @@ spec:
         fi
         echo "Scan project 123 with i3gis is starting..."
 
-    - name: i3gis-scan-status
+    - name: appsec-scan-status
       image: debian
       script: |
         #!/bin/sh
