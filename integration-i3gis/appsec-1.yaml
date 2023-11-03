@@ -5,13 +5,13 @@ metadata:
 spec:
   steps:
     - name: install-curl
-      image: ubuntu-latest
+      image: debian
       script: |
         #!/bin/sh
         apt-get update && apt-get install -y curl
 
     - name: i3gis-scan
-      image: ubuntu-latest
+      image: debian
       script: |
         #!/bin/sh
         urlScan="https://api.i3gis.id/scan-svc/scan"
@@ -37,7 +37,7 @@ spec:
         echo "Scan project $project_id with i3gis is starting..."
 
     - name: i3gis-scan-status
-      image: ubuntu-latest
+      image: debian
       script: |
         #!/bin/sh
         echo "Get scan status..."
