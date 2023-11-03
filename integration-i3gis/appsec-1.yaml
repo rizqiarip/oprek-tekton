@@ -4,7 +4,7 @@ metadata:
   name: i3gisintegration
 spec:
   steps:
-    - name: I3GIS_SCAN
+    - name: scan
       image: alpine
       script: |
         #!/bin/sh
