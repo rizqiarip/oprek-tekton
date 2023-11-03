@@ -5,9 +5,10 @@ metadata:
 spec:
   steps:
     - name: scan
-      image: alpine
+      image: debian
       script: |
         #!/bin/sh
+        apk add --no-cache curl
         urlScan="https://api.i3gis.id/scan-svc/scan"
         token="Bearer 6Kb03xxdXX88x6MQRj3QwZv9yQsOg/RM0xfJABSZsU+qfRLjQyJDTQTBrvWbke0lv9xwfxD1Mc3q9tGIkh8fOfTilhxB5TLowFmR3MEoxiO1hN0cCdMA5hZwHIoaRVnKoIWVrqgsOOJym5bEFnBPww=="
         project_id=5
