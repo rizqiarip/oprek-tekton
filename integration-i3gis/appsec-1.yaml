@@ -4,11 +4,16 @@ metadata:
   name: i3gisintegration
 spec:
   steps:
-    - name: scan
-      image: debian
+    - name: install-curl
+      image: ubuntu-latest
       script: |
         #!/bin/sh
         apt-get update && apt-get install -y curl
+
+    - name: i3gis-scan
+      image: ubuntu-latest
+      script: |
+        #!/bin/sh
         urlScan="https://api.i3gis.id/scan-svc/scan"
         token="Bearer 6Kb03xxdXX88x6MQRj3QwZv9yQsOg/RM0xfJABSZsU+qfRLjQyJDTQTBrvWbke0lv9xwfxD1Mc3q9tGIkh8fOfTilhxB5TLowFmR3MEoxiO1hN0cCdMA5hZwHIoaRVnKoIWVrqgsOOJym5bEFnBPww=="
         project_id=5
@@ -30,3 +35,36 @@ spec:
         fi
 
         echo "Scan project $project_id with i3gis is starting..."
+
+    - name: i3gis-scan-status
+      image: ubuntu-latest
+      script: |
+        #!/bin/sh
+        echo "Get scan status..."
+        status_running=true
+    
+        while $status_running; do
+            sleep 5
+            echo "Scan still running..."
+            urlStatus="https://api.i3gis.id/scan-svc/scan/5"
+            token="Bearer kRCNeHC+np9t0Gjs0S049nHfX+fHBjvVzbUgFmgXjsBRZe8oON2jDvdACG/PFENAvtBpGS4sG1NfNjbL0QLCK6c114sIODEv6Dv8uxYXUWyPaNgy1RXclvlPA1/uv/ukUPcAboVW+LGCNtNaq2Bc8A=="
+    
+            responseStatus=$(curl -s -w '\n%{response_code}' --location -g --request GET $urlStatus \
+                            --header 'Content-Type: application/json' \
+                            --header "Authorization: $token")
+    
+            codeStatus=$(echo "$responseStatus" | tail -n1)
+    
+            echo "HTTP response status code: $codeStatus"
+    
+            if [ "$codeStatus" != "200" ] && [ "$codeStatus" != "404" ]; then
+                echo "Response: $responseStatus"
+                exit 1
+            fi
+    
+            if [ "$codeStatus" == "404" ]; then
+                break
+            fi
+        done
+    
+        echo "Scan finished..."
