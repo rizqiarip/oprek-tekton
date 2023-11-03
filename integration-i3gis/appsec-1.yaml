@@ -54,6 +54,7 @@ spec:
             echo "HTTP response status code: $codeStatus"
     
             if [ "$codeStatus" != "200" ] && [ "$codeStatus" != "404" ]; then
+                echo "Value of codeStatus is: $codeStatus"
                 echo "Response: $responseStatus"
                 exit 1
             fi
