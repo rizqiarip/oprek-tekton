@@ -1,0 +1,47 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: i3gis-dynamic
+spec:
+  steps:
+    - name: dast-scan
+      image: debian
+      script: |
+        #!/bin/sh
+        apt-get update && apt-get install -y curl
+        echo "Scanning context 1 Context instagram FULL in site instagram with i3gis..."
+        scanResponse=$(curl --write-out '%{http_code}' --request POST -sL --url 'https://api.i3gis.id/dast-svc/scan' --header 'Content-Type: application/json' --header 'Authorization: Bearer 9+/Mb0/Ga1DfD2TMJYqVFNaRi+vajpMbd5U2CIkzUtX/4bFCMrVLPfP29U2v66ZwWQb3CKx9oPCGKTPeTl5Ig19aukyT3nADU0GAw5vTqxEdid/xVv9MQfZAsJXtmtEAyZoXGfC2LmwaF445t6H6SQ==' --data '{"context_id":1}')
+        scanCode=$(echo $scanResponse | grep -o ...$)
+        echo "HTTP response status code: $scanCode"
+        if [ $scanCode = "201" ]; then
+          echo "Scan context 1 Context instagram FULL in site instagram with i3gis..."
+        else
+          echo "Response: $scanResponse"
+          echo "Build failed because scan not success..."
+          exit 1
+        fi
+        echo "Scan context 1 Context instagram FULL in site instagram with i3gis is starting..."
+
+    - name: dast-scan-status
+      image: debian
+      script: |
+        #!/bin/sh
+        apt-get update && apt-get install -y curl
+        echo "Get scan status..."
+        status_running=true
+        while [ "$status_running" = true ]; do
+          sleep 5
+          echo "Scan still running..."
+          checkResponse=$(curl --write-out ''%{http_code}'' --request GET -sL --url 'https://api.i3gis.id/dast-svc/context-integration/1' --header 'Content-Type: application/json' --header 'Authorization: Bearer 9+/Mb0/Ga1DfD2TMJYqVFNaRi+vajpMbd5U2CIkzUtX/4bFCMrVLPfP29U2v66ZwWQb3CKx9oPCGKTPeTl5Ig19aukyT3nADU0GAw5vTqxEdid/xVv9MQfZAsJXtmtEAyZoXGfC2LmwaF445t6H6SQ==')
+          checkCode=$(echo $checkResponse | grep -o ...$)
+          echo "HTTP response status code: $checkCode"
+          if [ $checkCode != "200" ] && [ $checkCode != "404" ]; then
+            echo "Response: $checkResponse"
+            echo "Scan failed..."
+            exit 1
+          fi
+          if [ $checkCode = "404" ]; then
+            echo "Scan finished..."
+            status_running=false
+          fi
+        done
