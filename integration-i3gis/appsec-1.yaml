@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: i3gisintegration
+  name: i3gis-appsec
 spec:
   steps:
     - name: install-curl
