@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: i3gis_integration
+  name: i3gisintegration
 spec:
   steps:
     - name: I3GIS_SCAN
