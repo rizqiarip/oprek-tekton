@@ -5,9 +5,10 @@ metadata:
 spec:
   steps:
     - name: appsec-scan
-      image: debian-curl
+      image: curlimages/curl
       script: |
-        #!/bin/sh
+#        #!/bin/sh
+#        apt-get install curl -y
         echo "Scanning project 123 with i3gis..."
         scanResponse=$(curl --write-out '%{http_code}' --request POST -sL --url 'https://api.i3gis.id/scan-svc/scan' --header 'Content-Type: application/json' --header 'Authorization: Bearer zOYFAF34oZRjPVMVC666kuEXJoB2qFzyVanntw4Hd6PjmmzT827vPhP7q1VGfWgP6sGdKwuPXUyWqe/+V5nVfAMCSCaaVreCBJmkXCQh8sWZwPMCEl2E4QMPJSnlhUFaVpgbZ310Bd9YyA9ev4tptw==' --data '{"project_id":5}')
         scanCode=$(echo $scanResponse | grep -o ...$)
@@ -22,9 +23,10 @@ spec:
         echo "Scan project 123 with i3gis is starting..."
 
     - name: appsec-scan-status
-      image: debian-curl
+      image: curlimages/curl
       script: |
-        #!/bin/sh
+#        #!/bin/sh
+#        apt-get install curl --no-cache -y
         echo "Get scan status..."
         status_running=true
         while [ "$status_running" = true ]; do
