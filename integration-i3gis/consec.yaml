@@ -4,32 +4,32 @@ metadata:
   name: i3gis-task
 spec:
   steps:
-    - name: setup-i3gis-env
+    - name: consec-env
       image: debian
       script: |
-        echo "I3GIS_SCAN_IMAGE_TAG=1.0.0" > $(results.path)/i3gis_output
+        echo "I3GIS_SCAN_IMAGE_TAG=1.0.0" > $(results.artifacts.i3gis-output.location)/i3gis_output
 
-    - name: i3gis-job
+    - name: consec-scan
       image: debian
       script: |
-        apt-get install curl -y
+        apt install curl -y
         scanResponse=$(curl --write-out '%{http_code}' --request POST -sL --url '/api/v1/integration/image/scan' --header 'Content-Type: application/json' --header 'Authorization: Bearer NKIXHVYgwWwkqn5hPqYxoSTGxqWdGW3ZlmvVJFuerjOD78BwfGFLcuft5RrivQQfJIwKXFpXrUyfjNgR3BW83RtP7wXW7AIal71dK98vkmvf8qphcnq+tk5iUxtEB8P94wpD2dJuKVvd+ciS6BUo6z1m2S9oARp2' --data '{"container_project_id":2,"image_name":"nginx", "image_tag":"1.0.0"}')
         scanCode=$(echo $scanResponse | grep -o ...$)
         echo "HTTP response status code: $scanCode"
         if [ $scanCode = "201" ]; then
           echo "Scan successful..."
-          echo "$scanResponse" > $(results.path)/scan_output
+          echo "$scanResponse" > $(results.artifacts.i3gis-output.location)/scan_output
         else
           echo "Response: $scanResponse"
           echo "Scan failed..."
           exit 1
         fi
 
-    - name: i3gis-status-job
+    - name: consec-scan-status
       image: debian
       script: |
+        apt install curl -y
         echo "Get scan status..."
-        apt-get install curl -y
         status_running=true
         while [ "$status_running" = true ]; do
           sleep 5
@@ -48,6 +48,6 @@ spec:
           fi
         done
   results:
-    - name: i3gis-output
-      description: Output from i3gis steps
-      path: /workspace/output
+    artifacts:
+      - name: i3gis-output
+        description: Output from i3gis steps
