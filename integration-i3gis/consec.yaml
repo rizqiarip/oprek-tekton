@@ -7,7 +7,7 @@ spec:
     - name: consec-env
       image: debian
       script: |
-        echo "I3GIS_SCAN_IMAGE_TAG=1.0.0" > $(results.artifacts.i3gis-output.location)/i3gis_output
+        echo "I3GIS_SCAN_IMAGE_TAG=1.0.0" > $(results.named.i3gis-output.path)/i3gis_output
 
     - name: consec-scan
       image: debian
@@ -18,7 +18,7 @@ spec:
         echo "HTTP response status code: $scanCode"
         if [ $scanCode = "201" ]; then
           echo "Scan successful..."
-          echo "$scanResponse" > $(results.artifacts.i3gis-output.location)/scan_output
+          echo "$scanResponse" > $(results.named.i3gis-output.path)/scan_output
         else
           echo "Response: $scanResponse"
           echo "Scan failed..."
@@ -48,6 +48,6 @@ spec:
           fi
         done
   results:
-    artifacts:
+    named:
       - name: i3gis-output
         description: Output from i3gis steps
