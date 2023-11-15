@@ -1,0 +1,53 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: i3gis-task
+spec:
+  steps:
+    - name: setup-i3gis-env
+      image: debian
+      script: |
+        echo "I3GIS_SCAN_IMAGE_TAG=1.0.0" > $(results.path)/i3gis_output
+
+    - name: i3gis-job
+      image: debian
+      script: |
+        apt-get install curl -y
+        scanResponse=$(curl --write-out '%{http_code}' --request POST -sL --url '/api/v1/integration/image/scan' --header 'Content-Type: application/json' --header 'Authorization: Bearer NKIXHVYgwWwkqn5hPqYxoSTGxqWdGW3ZlmvVJFuerjOD78BwfGFLcuft5RrivQQfJIwKXFpXrUyfjNgR3BW83RtP7wXW7AIal71dK98vkmvf8qphcnq+tk5iUxtEB8P94wpD2dJuKVvd+ciS6BUo6z1m2S9oARp2' --data '{"container_project_id":2,"image_name":"nginx", "image_tag":"1.0.0"}')
+        scanCode=$(echo $scanResponse | grep -o ...$)
+        echo "HTTP response status code: $scanCode"
+        if [ $scanCode = "201" ]; then
+          echo "Scan successful..."
+          echo "$scanResponse" > $(results.path)/scan_output
+        else
+          echo "Response: $scanResponse"
+          echo "Scan failed..."
+          exit 1
+        fi
+
+    - name: i3gis-status-job
+      image: debian
+      script: |
+        echo "Get scan status..."
+        apt-get install curl -y
+        status_running=true
+        while [ "$status_running" = true ]; do
+          sleep 5
+          echo "Scan still running..."
+          checkResponse=$(curl --write-out '%{http_code}' --request GET -sL --url '/api/v1/integration/image/12345' --header 'Content-Type: application/json' --header 'Authorization: Bearer NKIXHVYgwWwkqn5hPqYxoSTGxqWdGW3ZlmvVJFuerjOD78BwfGFLcuft5RrivQQfJIwKXFpXrUyfjNgR3BW83RtP7wXW7AIal71dK98vkmvf8qphcnq+tk5iUxtEB8P94wpD2dJuKVvd+ciS6BUo6z1m2S9oARp2')
+          checkCode=$(echo $checkResponse | grep -o ...$)
+          echo "HTTP response status code: $checkCode"
+          if [ $checkCode != "201" ] && [ $checkCode != "404" ]; then
+            echo "Response: $checkResponse"
+            echo "Scan failed..."
+            exit 1
+          fi
+          if [ $checkCode = "404" ]; then
+            echo "Scan finished..."
+            status_running=false
+          fi
+        done
+  results:
+    - name: i3gis-output
+      description: Output from i3gis steps
+      path: /workspace/output
