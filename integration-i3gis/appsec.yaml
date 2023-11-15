@@ -5,15 +5,16 @@ metadata:
 spec:
   steps:
     - name: appsec-scan
-      image: busybox:latest
+      image: debian
       script: |
         #!/bin/sh
+        apt-get update -y && apt-get install curl -y
         echo "Scanning project dvsa with i3gis..."
         scanResponse=$(curl --write-out '%{http_code}' --request POST -sL --url 'https://console-api.i3gis.id/scan-svc/scan' --header 'Content-Type: application/json' --header 'Authorization: Bearer wMG5zBx+Fc9+LsfHymJXw3Rnaix3eMfeZ0dnFuiquEtWsHTWjyvI1MrhbYrpvilPjdSUjMJKznHCJrVwnxZqqlNrDdwLcMHRhB1Imzn0FIi7lIWEuhB3cvKqFKdEoTtn+48DsQKsWnotU24YTQF52g==' --data '{"project_id":1}')
         scanCode=$(echo $scanResponse | grep -o ...$)
         echo "HTTP response status code: $scanCode"
         if [ $scanCode = "200" ]; then
-          echo "Scan project dvsa with i3gis..."
+        echo "Scan project dvsa with i3gis..."
         else
           echo "Response: $scanResponse"
           echo "Build failed because scan was not successful..."
@@ -22,9 +23,10 @@ spec:
         echo "Scan project dvsa with i3gis is starting..."
 
     - name: appsec-scan-status
-      image: busybox:latest
+      image: debian
       script: |
-        #!/bin/sh        
+        #!/bin/sh
+        apt-get update -y && apt-get install curl -y
         echo "Get scan status..."
         status_running=true
         while [ "$status_running" = true ]; do
