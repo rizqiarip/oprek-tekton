@@ -5,7 +5,7 @@ metadata:
 spec:
   steps:
     - name: appsec-scan
-      image: alpine/curl:8.1.2
+      image: busybox:latest
       script: |
         #!/bin/sh
         echo "Scanning project dvsa with i3gis..."
@@ -22,7 +22,7 @@ spec:
         echo "Scan project dvsa with i3gis is starting..."
 
     - name: appsec-scan-status
-      image: alpine/curl:8.1.2
+      image: busybox:latest
       script: |
         #!/bin/sh        
         echo "Get scan status..."
