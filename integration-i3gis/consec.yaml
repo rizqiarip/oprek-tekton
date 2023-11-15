@@ -7,7 +7,7 @@ spec:
     - name: consec-env
       image: debian
       script: |
-        echo "I3GIS_SCAN_IMAGE_TAG=1.0.0" > $(results.dir)/i3gis_output
+        echo "I3GIS_SCAN_IMAGE_TAG=1.0.0" > /workspace/i3gis_output
 
     - name: consec-scan
       image: debian
@@ -18,7 +18,7 @@ spec:
         echo "HTTP response status code: $scanCode"
         if [ "$scanCode" = "201" ]; then
           echo "Scan successful..."
-          echo "$scanResponse" > $(results.dir)/scan_output
+          echo "$scanResponse" > /workspace/scan_output
         else
           echo "Response: $scanResponse"
           echo "Scan failed..."
