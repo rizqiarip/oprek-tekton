@@ -1,44 +1,53 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: i3gis-appsec
+  name: i3gis-task
 spec:
+  inputs: {}
+  outputs:
+    resources:
+      - name: i3gis-output
+        type: git
   steps:
-    - name: appsec-scan
-      image: debian-curl
+    - name: consec-env
+      image: debian
       script: |
-        #!/bin/sh
-        echo "Scanning project 123 with i3gis..."
-        scanResponse=$(curl --write-out '%{http_code}' --request POST -sL --url 'https://api.i3gis.id/scan-svc/scan' --header 'Content-Type: application/json' --header 'Authorization: Bearer zOYFAF34oZRjPVMVC666kuEXJoB2qFzyVanntw4Hd6PjmmzT827vPhP7q1VGfWgP6sGdKwuPXUyWqe/+V5nVfAMCSCaaVreCBJmkXCQh8sWZwPMCEl2E4QMPJSnlhUFaVpgbZ310Bd9YyA9ev4tptw==' --data '{"project_id":5}')
+        echo "I3GIS_SCAN_IMAGE_TAG=1.0.0" > $(results.dir)/i3gis_output
+
+    - name: consec-scan
+      image: debian
+      script: |
+        apt-get update && apt-get install -y curl
+        scanResponse=$(curl --write-out '%{http_code}' --request POST -sL --url '/api/v1/integration/image/scan' --header 'Content-Type: application/json' --header 'Authorization: Bearer NKIXHVYgwWwkqn5hPqYxoSTGxqWdGW3ZlmvVJFuerjOD78BwfGFLcuft5RrivQQfJIwKXFpXrUyfjNgR3BW83RtP7wXW7AIal71dK98vkmvf8qphcnq+tk5iUxtEB8P94wpD2dJuKVvd+ciS6BUo6z1m2S9oARp2' --data '{"container_project_id":2,"image_name":"nginx", "image_tag":"1.0.0"}')
         scanCode=$(echo $scanResponse | grep -o ...$)
         echo "HTTP response status code: $scanCode"
-        if [ $scanCode = "200" ]; then
-          echo "Scan project 123 with i3gis..."
+        if [ "$scanCode" = "201" ]; then
+          echo "Scan successful..."
+          echo "$scanResponse" > $(results.dir)/scan_output
         else
           echo "Response: $scanResponse"
-          echo "Build failed because scan was not successful..."
+          echo "Scan failed..."
           exit 1
         fi
-        echo "Scan project 123 with i3gis is starting..."
 
-    - name: appsec-scan-status
-      image: debian-curl
+    - name: consec-scan-status
+      image: debian
       script: |
-        #!/bin/sh
+        apt-get update && apt-get install -y curl
         echo "Get scan status..."
         status_running=true
         while [ "$status_running" = true ]; do
           sleep 5
           echo "Scan still running..."
-          checkResponse=$(curl --write-out ''%{http_code}'' --request GET -sL --url 'https://api.i3gis.id/scan-svc/scan/5' --header 'Content-Type: application/json' --header 'Authorization: Bearer zOYFAF34oZRjPVMVC666kuEXJoB2qFzyVanntw4Hd6PjmmzT827vPhP7q1VGfWgP6sGdKwuPXUyWqe/+V5nVfAMCSCaaVreCBJmkXCQh8sWZwPMCEl2E4QMPJSnlhUFaVpgbZ310Bd9YyA9ev4tptw==')
+          checkResponse=$(curl --write-out '%{http_code}' --request GET -sL --url '/api/v1/integration/image/12345' --header 'Content-Type: application/json' --header 'Authorization: Bearer NKIXHVYgwWwkqn5hPqYxoSTGxqWdGW3ZlmvVJFuerjOD78BwfGFLcuft5RrivQQfJIwKXFpXrUyfjNgR3BW83RtP7wXW7AIal71dK98vkmvf8qphcnq+tk5iUxtEB8P94wpD2dJuKVvd+ciS6BUo6z1m2S9oARp2')
           checkCode=$(echo $checkResponse | grep -o ...$)
           echo "HTTP response status code: $checkCode"
-          if [ $checkCode != "200" ] && [ $checkCode != "404" ]; then
+          if [ "$checkCode" != "201" ] && [ "$checkCode" != "404" ]; then
             echo "Response: $checkResponse"
             echo "Scan failed..."
             exit 1
           fi
-          if [ $checkCode = "404" ]; then
+          if [ "$checkCode" = "404" ]; then
             echo "Scan finished..."
             status_running=false
           fi
