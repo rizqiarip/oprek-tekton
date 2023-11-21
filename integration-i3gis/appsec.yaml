@@ -8,18 +8,18 @@ spec:
       image: registry.lab.i-3.my.id:5000/curl/curl:8
       script: |
         #!/bin/sh
-        echo "Scanning project sssssssssssssssssssssssssaa with i3gis..."
-        scanResponse=$(curl --write-out '%{http_code}' --request POST -sL --url 'http://10.8.60.34:8083/scan' --header 'Content-Type: application/json' --header 'Authorization: Bearer 5GwTMI1FEggpqmYhMp7V9CdmEa5NT5+jVlw2nMA6edAwu4mt1KHphwPUO4zpAiSJR5IPkVccEcCOnfuxEFigWUy1FFtV/l7sGYV9qygY1Vk=' --data '{"project_id":343}')
+        echo "Scanning project secret-check with i3gis..."
+        scanResponse=$(curl --write-out '%{http_code}' --request POST -sL --url 'https://api.i3gis.id/scan-svc/scan' --header 'Content-Type: application/json' --header 'Authorization: Bearer Q9uIuSdygdW+T1mIVDjVG8Ul6tkk8tp2g3DT2F1X8efGCf8eXOD2Yjj+/Aw5BnIpJqIwM0DfeBAaM9iWUqVJubqFAXtxxXsaHBdeAdSU8y6y6BlSOW5qf2tfAkxKVn7f' --data '{"project_id":63}')
         scanCode=$(echo $scanResponse | grep -o ...$)
         echo "HTTP response status code: $scanCode"
         if [ $scanCode = "200" ]; then
-          echo "Scan project sssssssssssssssssssssssssaa with i3gis..."
+          echo "Scan project secret-check with i3gis..."
         else
           echo "Response: $scanResponse"
           echo "Build failed because scan was not successful..."
           exit 1
         fi
-        echo "Scan project sssssssssssssssssssssssssaa with i3gis is starting..."
+        echo "Scan project secret-check with i3gis is starting..."
 
     - name: appsec-scan-status
       image: registry.lab.i-3.my.id:5000/curl/curl:8
@@ -30,7 +30,7 @@ spec:
         while [ "$status_running" = true ]; do
           sleep 5
           echo "Scan still running..."
-          checkResponse=$(curl --write-out ''%{http_code}'' --request GET -sL --url 'http://10.8.60.34:8083/scan/343' --header 'Content-Type: application/json' --header 'Authorization: Bearer 5GwTMI1FEggpqmYhMp7V9CdmEa5NT5+jVlw2nMA6edAwu4mt1KHphwPUO4zpAiSJR5IPkVccEcCOnfuxEFigWUy1FFtV/l7sGYV9qygY1Vk=')
+          checkResponse=$(curl --write-out ''%{http_code}'' --request GET -sL --url 'https://api.i3gis.id/scan-svc/scan/63' --header 'Content-Type: application/json' --header 'Authorization: Bearer Q9uIuSdygdW+T1mIVDjVG8Ul6tkk8tp2g3DT2F1X8efGCf8eXOD2Yjj+/Aw5BnIpJqIwM0DfeBAaM9iWUqVJubqFAXtxxXsaHBdeAdSU8y6y6BlSOW5qf2tfAkxKVn7f')
           checkCode=$(echo $checkResponse | grep -o ...$)
           echo "HTTP response status code: $checkCode"
           if [ $checkCode != "200" ] && [ $checkCode != "404" ]; then
